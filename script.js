@@ -15,19 +15,19 @@ let round = 1;
 let rolledDice = [];
 let roundResults = [];
 
-// 🎆 폭죽 변수
+// 🎆 폭죽 효과
 let fireworksCanvas, ctx;
 let particles = [];
 
-// 🎵 BGM 관련 변수
+// 🎵 BGM 관련
 let bgmPlaying = false;
 const bgm = document.getElementById("bgm");
 const bgmButton = document.getElementById("bgm-toggle");
 
-// 🔊 박수 효과음
+// 👏 박수소리
 const clapSound = document.getElementById("clap-sound");
 
-// ✅ BGM 버튼 클릭 이벤트
+// ✅ BGM 버튼 이벤트
 bgmButton.addEventListener("click", () => {
   if (!bgmPlaying) {
     bgm.volume = 0.4;
@@ -35,8 +35,8 @@ bgmButton.addEventListener("click", () => {
       bgmPlaying = true;
       bgmButton.innerText = "🎵 BGM OFF";
     }).catch(err => {
-      console.log("BGM 자동재생 차단됨:", err);
-      alert("🔈 브라우저에서 자동재생이 막혔습니다. 버튼을 한 번 더 눌러주세요.");
+      console.log("BGM 자동재생 차단:", err);
+      alert("🔈 브라우저 자동재생 정책으로 첫 클릭 후 다시 눌러주세요.");
     });
   } else {
     bgm.pause();
@@ -85,19 +85,39 @@ function distributeMoney() {
   }
 }
 
+/* ✅ 주사위 굴릴 때 돌아가는 효과 추가 */
 function rollDice() {
   if (diceLeft[currentPlayer] <= 0) return;
 
-  rolledDice = [];
-  for (let i = 0; i < diceLeft[currentPlayer]; i++) {
-    rolledDice.push(Math.floor(Math.random() * 6) + 1);
+  const resultDiv = document.getElementById("dice-result");
+  resultDiv.innerHTML = "";
+
+  // 🎲 가짜 주사위 5개 (회전 애니메이션)
+  for (let i = 0; i < 5; i++) {
+    let dummyDice = document.createElement("img");
+    dummyDice.src = diceImages[Math.floor(Math.random() * 6)];
+    dummyDice.classList.add("rolling");
+    dummyDice.style.width = "42px";
+    dummyDice.style.margin = "2px";
+    dummyDice.style.border = "2px solid black";
+    dummyDice.style.borderRadius = "8px";
+    dummyDice.style.background = "white";
+    resultDiv.appendChild(dummyDice);
   }
 
-  const resultDiv = document.getElementById("dice-result");
-  resultDiv.innerHTML = `Player ${currentPlayer} rolled: ` + 
-    rolledDice.map(num => `<img src="${diceImages[num-1]}" width="42" style="margin:2px; border:2px solid black; border-radius:8px; background:white; box-shadow:0 0 5px rgba(0,0,0,0.8);">`).join(" ");
-  
-  showChoiceButtons();
+  // 🎯 0.7초 후 실제 주사위 결과 표시
+  setTimeout(() => {
+    rolledDice = [];
+    for (let i = 0; i < diceLeft[currentPlayer]; i++) {
+      rolledDice.push(Math.floor(Math.random() * 6) + 1);
+    }
+
+    resultDiv.innerHTML = `Player ${currentPlayer} rolled: ` + 
+      rolledDice.map(num => `<img src="${diceImages[num-1]}" width="42" 
+      style="margin:2px; border:2px solid black; border-radius:8px; background:white; box-shadow:0 0 5px rgba(0,0,0,0.8);">`).join(" ");
+
+    showChoiceButtons();
+  }, 700);
 }
 
 function showChoiceButtons() {
@@ -115,7 +135,6 @@ function placeDice(num) {
   let count = rolledDice.filter(d => d === num).length;
   casinos[num][`p${currentPlayer}`] += count;
 
-  // 🎲 카지노에 주사위 추가
   let casinoDiv = document.getElementById(`casino-${num}`);
   for (let i = 0; i < count; i++) {
     let diceDiv = document.createElement("div");
@@ -129,13 +148,11 @@ function placeDice(num) {
   document.getElementById(`p${currentPlayer}-dice`).innerText = diceLeft[currentPlayer];
   document.getElementById("choice-area").innerHTML = "";
 
-  // 라운드 종료 확인
   if (diceLeft[1] === 0 && diceLeft[2] === 0) {
     endRound();
     return;
   }
 
-  // 턴 넘김
   do {
     currentPlayer = currentPlayer === 1 ? 2 : 1;
   } while (diceLeft[currentPlayer] === 0);
@@ -154,10 +171,8 @@ function endRound() {
     else if (p2 > p1) money[2] += casinos[i].money;
   }
 
-  // 승자 판정
   let winner = (money[1] > money[2]) ? "Player 1" : (money[2] > money[1]) ? "Player 2" : "Draw";
 
-  // 점수판 업데이트
   roundResults.push({ round, p1: money[1], p2: money[2], winner });
   updateScoreboard();
 
@@ -172,14 +187,12 @@ function endRound() {
     nextBtn.onclick = () => startNextRound();
     controls.appendChild(nextBtn);
   } else {
-    // ✅ 최종 라운드 끝 → 폭죽 + 박수소리 효과
+    // ✅ 최종 라운드 종료 → 폭죽 + 박수소리
     document.getElementById("message").innerText = `🎉 게임 종료! 🏆 ${winner} 승리!`;
 
-    // 👏 박수소리 재생
     clapSound.currentTime = 0;
     clapSound.play().catch(err => console.log("박수소리 차단:", err));
 
-    // 🎆 폭죽 50개 발사
     for (let i = 0; i < 50; i++) {
       particles.push(createParticle());
     }
@@ -217,7 +230,7 @@ function updateScoreboard() {
   });
 }
 
-// 🎆 폭죽 관련 함수
+/* 🎆 폭죽 관련 */
 function createParticle() {
   return {
     x: Math.random() * window.innerWidth,
