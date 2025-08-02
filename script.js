@@ -15,6 +15,7 @@ let money = {1: 0, 2: 0};
 let round = 1;
 let rolledDice = [];
 let bgmPlaying = false;
+let roundResults = [];   // ✅ 라운드별 점수 저장
 
 // 🎆 폭죽 변수
 let fireworksCanvas, ctx;
@@ -147,6 +148,7 @@ function placeDice(num) {
 function endRound() {
   document.getElementById("message").innerText = "💰 라운드 종료! 점수 계산 중...";
 
+  // ✅ 점수 계산
   for (let i = 1; i <= 6; i++) {
     let p1Count = casinos[i].p1;
     let p2Count = casinos[i].p2;
@@ -161,90 +163,25 @@ function endRound() {
     }
   }
 
-  document.getElementById("p1-money").innerText = money[1].toLocaleString();
-  document.getElementById("p2-money").innerText = money[2].toLocaleString();
-
-  startFireworks();
-
-  // ✅ 다음 라운드 버튼 만들기 (마지막 라운드는 버튼 없이 게임 끝)
-  const controls = document.getElementById("controls");
-  if (round < 4) {
-    document.getElementById("message").innerText = `✅ 라운드 ${round} 종료! [Player1: ${money[1]} / Player2: ${money[2]}]`;
-    let nextBtn = document.createElement("button");
-    nextBtn.id = "next-round-btn";
-    nextBtn.innerText = "👉 다음 라운드 시작";
-    nextBtn.onclick = () => startNextRound();
-    controls.appendChild(nextBtn);
-  } else {
-    endGame();
-  }
-}
-
-function startNextRound() {
-  // 다음 라운드 준비
-  round++;
-  document.getElementById("round-num").innerText = round;
-  diceLeft = {1: 8, 2: 8};
-  casinos.forEach(c => { if (c) { c.p1 = 0; c.p2 = 0; } });
-  initGame();
-  document.getElementById("p1-dice").innerText = "8";
-  document.getElementById("p2-dice").innerText = "8";
-  currentPlayer = 1;
-
-  // 버튼 삭제
-  const nextBtn = document.getElementById("next-round-btn");
-  if (nextBtn) nextBtn.remove();
-}
-
-function flashMoney(casinoNum) {
-  const moneyDiv = document.getElementById(`money-${casinoNum}`);
-  moneyDiv.classList.add("flash");
-
-  let cashSound = document.getElementById("cash-sound");
-  cashSound.currentTime = 0;
-  cashSound.play().catch(err => console.log("Cash sound blocked:", err));
-
-  setTimeout(() => {
-    moneyDiv.classList.remove("flash");
-  }, 1000);
-}
-
-function endGame() {
-  document.getElementById("message").innerText = "🎉 게임 종료!";
+  // ✅ 라운드 승자 판정
+  let winner;
   if (money[1] > money[2]) {
-    document.getElementById("message").innerText += " 🔴 Player 1 승리!";
+    winner = "Player 1";
   } else if (money[2] > money[1]) {
-    document.getElementById("message").innerText += " 🔵 Player 2 승리!";
+    winner = "Player 2";
   } else {
-    document.getElementById("message").innerText += " 🤝 무승부!";
+    winner = "Draw";
   }
-  document.getElementById("roll-btn").disabled = true;
-}
 
-// 🎆 폭죽
-function startFireworks() {
-  for (let i = 0; i < 50; i++) {
-    particles.push({
-      x: Math.random() * fireworksCanvas.width,
-      y: Math.random() * fireworksCanvas.height / 2,
-      dx: (Math.random() - 0.5) * 4,
-      dy: (Math.random() - 0.5) * 4,
-      life: 100
-    });
-  }
-}
-
-function animateFireworks() {
-  ctx.clearRect(0, 0, fireworksCanvas.width, fireworksCanvas.height);
-  particles.forEach((p, index) => {
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
-    ctx.fillStyle = `hsl(${Math.random() * 360}, 100%, 50%)`;
-    ctx.fill();
-    p.x += p.dx;
-    p.y += p.dy;
-    p.life--;
-    if (p.life <= 0) particles.splice(index, 1);
+  // ✅ 점수판에 라운드 기록 추가
+  roundResults.push({
+    round: round,
+    p1: money[1],
+    p2: money[2],
+    winner: winner
   });
-  requestAnimationFrame(animateFireworks);
-}
+
+  updateScoreboard();
+
+  document.getElementById("p1-money").innerText = money[1].toLocaleString();
+  document
