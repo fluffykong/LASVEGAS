@@ -1,11 +1,11 @@
-// 🎲 깨짐 없는 PNG 주사위 이미지 (1024px 해상도)
+// 🎲 깨짐 없는 PNG 주사위 이미지 (흰 바탕 + 빨간 점)
 const diceImages = [
-  "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Dice-1-b.svg/1024px-Dice-1-b.svg.png",
-  "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Dice-2-b.svg/1024px-Dice-2-b.svg.png",
-  "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Dice-3-b.svg/1024px-Dice-3-b.svg.png",
-  "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/Dice-4-b.svg/1024px-Dice-4-b.svg.png",
-  "https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Dice-5-b.svg/1024px-Dice-5-b.svg.png",
-  "https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/Dice-6-b.svg/1024px-Dice-6-b.svg.png"
+  "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Dice-1-b.svg/512px-Dice-1-b.svg.png",
+  "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Dice-2-b.svg/512px-Dice-2-b.svg.png",
+  "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Dice-3-b.svg/512px-Dice-3-b.svg.png",
+  "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/Dice-4-b.svg/512px-Dice-4-b.svg.png",
+  "https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Dice-5-b.svg/512px-Dice-5-b.svg.png",
+  "https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/Dice-6-b.svg/512px-Dice-6-b.svg.png"
 ];
 
 const casinos = [];
@@ -30,15 +30,18 @@ function initGame() {
     div.className = "casino";
     div.id = `casino-${i}`;
     div.innerHTML = `
-      <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Casino_chip_icon.svg" width="35">
-      <div class="money" id="money-${i}"></div>`;
+      <div class="casino-header">
+        <img class="chip" src="https://i.imgur.com/tqQY3Up.png" width="38">
+        <span class="casino-number">🎰 ${i}</span>
+      </div>
+      <div class="money" id="money-${i}"></div>
+    `;
     board.appendChild(div);
     casinos[i] = { p1: 0, p2: 0, money: 0 };
   }
   distributeMoney();
   document.getElementById("message").innerText = `🎉 Player 1 차례!`;
 
-  // 🎆 폭죽 Canvas 초기화
   fireworksCanvas = document.getElementById("fireworks");
   ctx = fireworksCanvas.getContext("2d");
   fireworksCanvas.width = window.innerWidth;
@@ -46,7 +49,7 @@ function initGame() {
   animateFireworks();
 }
 
-// 🎼 BGM 토글 버튼
+// 🎼 BGM 토글
 document.getElementById("bgm-toggle").addEventListener("click", () => {
   let bgm = document.getElementById("bgm");
   if (!bgmPlaying) {
@@ -61,7 +64,7 @@ document.getElementById("bgm-toggle").addEventListener("click", () => {
   }
 });
 
-// 🎲 주사위 굴리기 버튼 클릭
+// 🎲 주사위 굴리기 버튼
 document.getElementById("roll-btn").addEventListener("click", () => {
    let rollSound = document.getElementById("roll-sound");
    rollSound.currentTime = 0;
@@ -92,9 +95,8 @@ function rollDice() {
   resultDiv.innerText = "🎲 주사위 굴리는 중...";
   
   setTimeout(() => {
-    // 던진 주사위 결과 표시 (이미지)
     resultDiv.innerHTML = `Player ${currentPlayer} rolled: ` + 
-      rolledDice.map(num => `<img src="${diceImages[num-1]}" width="40" style="margin:2px;">`).join(" ");
+      rolledDice.map(num => `<img src="${diceImages[num-1]}" width="42" style="margin:2px; border:2px solid black; border-radius:8px; background:white;">`).join(" ");
     showChoiceButtons();
   }, 600);
 }
@@ -105,7 +107,7 @@ function showChoiceButtons() {
   let uniqueNumbers = [...new Set(rolledDice)];
   uniqueNumbers.forEach(num => {
     let btn = document.createElement("button");
-    btn.innerHTML = `<img src="${diceImages[num-1]}" width="30"> (${num})`;
+    btn.innerHTML = `<img src="${diceImages[num-1]}" width="30" style="border:1px solid black; border-radius:5px; background:white;"> (${num})`;
     btn.onclick = () => placeDice(num);
     area.appendChild(btn);
   });
@@ -120,8 +122,7 @@ function placeDice(num) {
   for (let i = 0; i < count; i++) {
     let diceDiv = document.createElement("div");
     diceDiv.className = "dice";
-    diceDiv.innerHTML = `<img src="${diceImages[num-1]}" 
-       style="border: 2px solid ${currentPlayer === 1 ? '#ff4d4d' : '#4db8ff'}; border-radius: 5px;">`;
+    diceDiv.innerHTML = `<img src="${diceImages[num-1]}" style="border: 2px solid ${currentPlayer === 1 ? '#ff4d4d' : '#4db8ff'}; border-radius: 5px; background:white;">`;
     casinoDiv.appendChild(diceDiv);
   }
 
@@ -176,10 +177,10 @@ function endRound() {
     document.getElementById("p1-dice").innerText = "8";
     document.getElementById("p2-dice").innerText = "8";
     currentPlayer = 1;
-    startFireworks(); // 🎆 라운드 폭죽
+    startFireworks();
   } else {
     endGame();
-    startFireworks(); // 🎆 게임 종료 폭죽
+    startFireworks();
   }
 }
 
@@ -187,7 +188,6 @@ function flashMoney(casinoNum) {
   const moneyDiv = document.getElementById(`money-${casinoNum}`);
   moneyDiv.classList.add("flash");
 
-  // 🔊 돈 획득 효과음
   let cashSound = document.getElementById("cash-sound");
   cashSound.currentTime = 0;
   cashSound.play().catch(err => console.log("Cash sound blocked:", err));
