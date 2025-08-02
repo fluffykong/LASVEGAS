@@ -1,10 +1,24 @@
-const diceFaces = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
+// 🎲 주사위 이미지
+const diceImages = [
+  "https://upload.wikimedia.org/wikipedia/commons/1/1b/Dice-1-b.svg",
+  "https://upload.wikimedia.org/wikipedia/commons/5/5f/Dice-2-b.svg",
+  "https://upload.wikimedia.org/wikipedia/commons/b/b1/Dice-3-b.svg",
+  "https://upload.wikimedia.org/wikipedia/commons/f/fd/Dice-4-b.svg",
+  "https://upload.wikimedia.org/wikipedia/commons/0/08/Dice-5-b.svg",
+  "https://upload.wikimedia.org/wikipedia/commons/2/26/Dice-6-b.svg"
+];
+
+// 🎆 폭죽 관련 변수
+let fireworksCanvas, ctx;
+let particles = [];
+
 const casinos = [];
 let currentPlayer = 1;
 let diceLeft = {1: 8, 2: 8};
 let money = {1: 0, 2: 0};
 let round = 1;
 let rolledDice = [];
+let bgmPlaying = false;
 
 initGame();
 
@@ -15,13 +29,45 @@ function initGame() {
     let div = document.createElement("div");
     div.className = "casino";
     div.id = `casino-${i}`;
-    div.innerHTML = `<div class="money" id="money-${i}"></div>`;
+    div.innerHTML = `
+      <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Casino_chip_icon.svg" width="40">
+      <div class="money" id="money-${i}"></div>`;
     board.appendChild(div);
     casinos[i] = { p1: 0, p2: 0, money: 0 };
   }
   distributeMoney();
   document.getElementById("message").innerText = `🎉 Player 1 차례!`;
+
+  // 🎆 폭죽 Canvas 초기화
+  fireworksCanvas = document.getElementById("fireworks");
+  ctx = fireworksCanvas.getContext("2d");
+  fireworksCanvas.width = window.innerWidth;
+  fireworksCanvas.height = window.innerHeight;
+  animateFireworks();
 }
+
+// 🎼 BGM 토글
+document.getElementById("bgm-toggle").addEventListener("click", () => {
+  let bgm = document.getElementById("bgm");
+  if (!bgmPlaying) {
+    bgm.volume = 0.4;
+    bgm.play();
+    bgmPlaying = true;
+    document.getElementById("bgm-toggle").innerText = "🎵 BGM OFF";
+  } else {
+    bgm.pause();
+    bgmPlaying = false;
+    document.getElementById("bgm-toggle").innerText = "🎵 BGM ON";
+  }
+});
+
+// 🎲 주사위 굴리기 버튼
+document.getElementById("roll-btn").addEventListener("click", () => {
+   let rollSound = document.getElementById("roll-sound");
+   rollSound.currentTime = 0;
+   rollSound.play().catch(err => console.log("Sound blocked:", err));
+   rollDice();
+});
 
 function distributeMoney() {
   for (let i = 1; i <= 6; i++) {
@@ -31,16 +77,11 @@ function distributeMoney() {
   }
 }
 
-document.getElementById("roll-btn").addEventListener("click", rollDice);
-
 function rollDice() {
   if (diceLeft[currentPlayer] <= 0) {
     alert(`Player ${currentPlayer} has no dice left!`);
     return;
   }
-
-  // 🔊 주사위 굴리는 소리 재생
-  document.getElementById("roll-sound").play();
 
   rolledDice = [];
   for (let i = 0; i < diceLeft[currentPlayer]; i++) {
@@ -50,9 +91,8 @@ function rollDice() {
   const resultDiv = document.getElementById("dice-result");
   resultDiv.innerText = "🎲 주사위 굴리는 중...";
   setTimeout(() => {
-    // 주사위 아이콘 표시
-    const diceIcons = rolledDice.map(num => diceFaces[num-1]).join(" ");
-    resultDiv.innerText = `Player ${currentPlayer} rolled: ${diceIcons}`;
+    resultDiv.innerHTML = `Player ${currentPlayer} rolled: ` + 
+      rolledDice.map(num => `<img src="${diceImages[num-1]}" width="30">`).join(" ");
     showChoiceButtons();
   }, 600);
 }
@@ -63,7 +103,7 @@ function showChoiceButtons() {
   let uniqueNumbers = [...new Set(rolledDice)];
   uniqueNumbers.forEach(num => {
     let btn = document.createElement("button");
-    btn.innerText = `${diceFaces[num-1]} (${num})`;
+    btn.innerHTML = `<img src="${diceImages[num-1]}" width="25"> (${num})`;
     btn.onclick = () => placeDice(num);
     area.appendChild(btn);
   });
@@ -73,22 +113,23 @@ function placeDice(num) {
   let count = rolledDice.filter(d => d === num).length;
   casinos[num][`p${currentPlayer}`] += count;
 
-  // 🎲 주사위 배치
+  // 🎲 카지노에 주사위 표시
   let casinoDiv = document.getElementById(`casino-${num}`);
   for (let i = 0; i < count; i++) {
-    let diceIcon = document.createElement("div");
-    diceIcon.className = "dice";
-    diceIcon.innerText = diceFaces[num-1];
-    diceIcon.style.color = currentPlayer === 1 ? "#ff4d4d" : "#4db8ff";
-    casinoDiv.appendChild(diceIcon);
+    let diceDiv = document.createElement("div");
+    diceDiv.className = "dice";
+    diceDiv.innerHTML = `<img src="${diceImages[num-1]}" style="border: 2px solid ${currentPlayer === 1 ? '#ff4d4d' : '#4db8ff'}; border-radius: 5px;">`;
+    casinoDiv.appendChild(diceDiv);
   }
+
+  // 📜 게임 로그 추가
+  addLog(`Player ${currentPlayer} placed ${count} dice on Casino ${num}`);
 
   // 주사위 감소
   diceLeft[currentPlayer] -= count;
   document.getElementById(`p${currentPlayer}-dice`).innerText = diceLeft[currentPlayer];
   document.getElementById("choice-area").innerHTML = "";
 
-  // 턴 교체 or 라운드 종료
   if (diceLeft[1] === 0 && diceLeft[2] === 0) {
     endRound();
   } else {
@@ -126,8 +167,10 @@ function endRound() {
     document.getElementById("p1-dice").innerText = "8";
     document.getElementById("p2-dice").innerText = "8";
     currentPlayer = 1;
+    startFireworks(); // 🎆 라운드 종료 시 폭죽
   } else {
     endGame();
+    startFireworks(); // 🎆 게임 종료 시 폭죽
   }
 }
 
@@ -136,7 +179,9 @@ function flashMoney(casinoNum) {
   moneyDiv.classList.add("flash");
 
   // 🔊 돈 획득 효과음
-  document.getElementById("cash-sound").play();
+  let cashSound = document.getElementById("cash-sound");
+  cashSound.currentTime = 0;
+  cashSound.play().catch(err => console.log("Cash sound blocked:", err));
 
   setTimeout(() => {
     moneyDiv.classList.remove("flash");
@@ -153,4 +198,40 @@ function endGame() {
     document.getElementById("message").innerText += " 🤝 무승부!";
   }
   document.getElementById("roll-btn").disabled = true;
+}
+
+// 📜 로그 추가 함수
+function addLog(text) {
+  const logList = document.getElementById("log-list");
+  const li = document.createElement("li");
+  li.innerText = text;
+  logList.prepend(li);
+}
+
+// 🎆 폭죽 관련
+function startFireworks() {
+  for (let i = 0; i < 50; i++) {
+    particles.push({
+      x: Math.random() * fireworksCanvas.width,
+      y: Math.random() * fireworksCanvas.height / 2,
+      dx: (Math.random() - 0.5) * 4,
+      dy: (Math.random() - 0.5) * 4,
+      life: 100
+    });
+  }
+}
+
+function animateFireworks() {
+  ctx.clearRect(0, 0, fireworksCanvas.width, fireworksCanvas.height);
+  particles.forEach((p, index) => {
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+    ctx.fillStyle = `hsl(${Math.random() * 360}, 100%, 50%)`;
+    ctx.fill();
+    p.x += p.dx;
+    p.y += p.dy;
+    p.life--;
+    if (p.life <= 0) particles.splice(index, 1);
+  });
+  requestAnimationFrame(animateFireworks);
 }
