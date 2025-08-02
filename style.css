@@ -84,11 +84,15 @@ h1 {
   text-shadow: 0 0 6px black;
 }
 
-/* 🎲 카지노에 올려진 주사위 (✅ 작게) */
+/* 🎲 카지노에 올려진 주사위 (✅ 이미지까지 강제 축소) */
 .casino .dice {
   width: 22px;
   height: 22px;
   margin: 1px;
+}
+.casino .dice img {
+  width: 22px !important;
+  height: 22px !important;
 }
 
 /* 🎲 던진 주사위 결과창 (크게 유지) */
