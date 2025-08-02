@@ -46,16 +46,19 @@ h1 {
   padding: 10px;
   min-height: 120px;
   box-shadow: 0 0 10px rgba(255,255,255,0.3);
-  transition: transform 0.2s ease;
   position: relative;
   text-align: center;
-}
-.casino:hover {
-  transform: scale(1.05);
+
+  /* ✅ 2열 배치 */
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  justify-items: center;
+  align-items: start;
 }
 
 /* 카지노 번호 */
 .casino-header {
+  grid-column: span 2; /* ✅ 헤더가 2칸 차지 */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -70,6 +73,7 @@ h1 {
 
 /* 돈 표시 */
 .money {
+  grid-column: span 2; /* ✅ 돈 표시도 2칸 전체 */
   font-size: 18px;
   margin-top: 5px;
   color: #ffffff;
@@ -81,34 +85,21 @@ h1 {
   text-shadow: 0 0 6px black;
 }
 
-/* 🎲 주사위 스타일 */
-.dice {
-  display: inline-block;
-  margin: 4px;
-  width: 42px;
-  height: 42px;
+/* 🎲 카지노 보드에 올려진 주사위 */
+.casino .dice {
+  width: 30px;  /* ✅ 기존보다 작게 */
+  height: 30px;
+  margin: 2px;
 }
-.dice img {
-  width: 100%;
-  height: 100%;
-  border: 2px solid #000;
+
+/* 🎲 던진 주사위 (결과창) */
+#dice-result img {
+  width: 42px;
+  margin: 2px;
+  border: 2px solid black;
   border-radius: 8px;
   background: white;
   box-shadow: 0 0 5px rgba(0,0,0,0.8);
-  transition: transform 0.2s ease;
-}
-.dice img:hover {
-  transform: rotate(5deg) scale(1.2);
-}
-
-/* 던진 주사위 결과 */
-#dice-result {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  max-width: 100%;
-  margin-top: 5px;
-  gap: 3px;
 }
 
 /* 버튼 */
@@ -138,6 +129,8 @@ button:hover {
   text-shadow: 0 0 10px #f5c400, 0 0 20px #ffef7b;
   animation: glowPulse 1.5s infinite alternate;
 }
+
+/* 애니메이션 */
 @keyframes glowPulse {
   from { text-shadow: 0 0 5px #ffef7b, 0 0 15px #ffef7b; }
   to { text-shadow: 0 0 15px #ffd500, 0 0 30px #ffef7b; }
