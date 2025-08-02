@@ -15,7 +15,7 @@ let money = {1: 0, 2: 0};
 let round = 1;
 let rolledDice = [];
 let bgmPlaying = false;
-let roundResults = [];   // ✅ 라운드별 점수 저장
+let roundResults = [];
 
 // 🎆 폭죽 변수
 let fireworksCanvas, ctx;
@@ -156,32 +156,15 @@ function endRound() {
     if (p1Count === p2Count) continue;
     else if (p1Count > p2Count) {
       money[1] += casinos[i].money;
-      flashMoney(i);
     } else {
       money[2] += casinos[i].money;
-      flashMoney(i);
     }
   }
 
   // ✅ 라운드 승자 판정
   let winner;
-  if (money[1] > money[2]) {
-    winner = "Player 1";
-  } else if (money[2] > money[1]) {
-    winner = "Player 2";
-  } else {
-    winner = "Draw";
-  }
+  if (money[1] > money[2]) winner = "Player 1";
+  else if (money[2] > money[1]) winner = "Player 2";
+  else winner = "Draw";
 
-  // ✅ 점수판에 라운드 기록 추가
-  roundResults.push({
-    round: round,
-    p1: money[1],
-    p2: money[2],
-    winner: winner
-  });
-
-  updateScoreboard();
-
-  document.getElementById("p1-money").innerText = money[1].toLocaleString();
-  document
+  // ✅ 점수판에
