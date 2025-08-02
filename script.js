@@ -19,6 +19,29 @@ let roundResults = [];
 let fireworksCanvas, ctx;
 let particles = [];
 
+// 🎵 BGM 관련 변수
+let bgmPlaying = false;
+const bgm = document.getElementById("bgm");
+const bgmButton = document.getElementById("bgm-toggle");
+
+// ✅ BGM 버튼 클릭 이벤트
+bgmButton.addEventListener("click", () => {
+  if (!bgmPlaying) {
+    bgm.volume = 0.4;
+    bgm.play().then(() => {
+      bgmPlaying = true;
+      bgmButton.innerText = "🎵 BGM OFF";
+    }).catch(err => {
+      console.log("BGM 자동재생 차단됨:", err);
+      alert("🔈 브라우저에서 자동재생이 막혔습니다. 버튼을 한 번 더 눌러주세요.");
+    });
+  } else {
+    bgm.pause();
+    bgmPlaying = false;
+    bgmButton.innerText = "🎵 BGM ON";
+  }
+});
+
 initGame();
 
 function initGame() {
@@ -48,6 +71,7 @@ function initGame() {
   animateFireworks();
 }
 
+// 🎲 주사위 굴리기 버튼
 document.getElementById("roll-btn").addEventListener("click", rollDice);
 
 function distributeMoney() {
@@ -88,12 +112,13 @@ function placeDice(num) {
   let count = rolledDice.filter(d => d === num).length;
   casinos[num][`p${currentPlayer}`] += count;
 
-  // ✅ 인라인 width 제거 → CSS에서 크기 제어
+  // 🎲 카지노에 주사위 추가 (인라인 width 제거 → CSS로 제어)
   let casinoDiv = document.getElementById(`casino-${num}`);
   for (let i = 0; i < count; i++) {
     let diceDiv = document.createElement("div");
     diceDiv.className = "dice";
-    diceDiv.innerHTML = `<img src="${diceImages[num-1]}" style="border: 2px solid ${currentPlayer === 1 ? '#ff4d4d' : '#4db8ff'}; border-radius: 5px; background:white; box-shadow:0 0 5px rgba(0,0,0,0.8);">`;
+    diceDiv.innerHTML = `<img src="${diceImages[num-1]}" 
+      style="border: 2px solid ${currentPlayer === 1 ? '#ff4d4d' : '#4db8ff'}; border-radius: 5px; background:white; box-shadow:0 0 5px rgba(0,0,0,0.8);">`;
     casinoDiv.appendChild(diceDiv);
   }
 
@@ -178,7 +203,7 @@ function updateScoreboard() {
   });
 }
 
-// 폭죽 애니메이션
+// 🎆 폭죽 애니메이션
 function animateFireworks() {
   ctx.clearRect(0, 0, fireworksCanvas.width, fireworksCanvas.height);
   particles.forEach((p, index) => {
