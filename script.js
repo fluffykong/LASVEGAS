@@ -1,4 +1,4 @@
-// 🎲 깨짐 없는 PNG 주사위 이미지 (흰 바탕 + 빨간 점)
+// 🎲 PNG 주사위 (흰 바탕 + 빨간 점)
 const diceImages = [
   "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Dice-1-b.svg/512px-Dice-1-b.svg.png",
   "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Dice-2-b.svg/512px-Dice-2-b.svg.png",
@@ -16,7 +16,7 @@ let round = 1;
 let rolledDice = [];
 let bgmPlaying = false;
 
-// 🎆 폭죽 효과 변수
+// 🎆 폭죽 변수
 let fireworksCanvas, ctx;
 let particles = [];
 
@@ -64,7 +64,7 @@ document.getElementById("bgm-toggle").addEventListener("click", () => {
   }
 });
 
-// 🎲 주사위 굴리기 버튼
+// 🎲 주사위 굴리기
 document.getElementById("roll-btn").addEventListener("click", () => {
    let rollSound = document.getElementById("roll-sound");
    rollSound.currentTime = 0;
@@ -96,7 +96,7 @@ function rollDice() {
   
   setTimeout(() => {
     resultDiv.innerHTML = `Player ${currentPlayer} rolled: ` + 
-      rolledDice.map(num => `<img src="${diceImages[num-1]}" width="42" style="margin:2px; border:2px solid black; border-radius:8px; background:white;">`).join(" ");
+      rolledDice.map(num => `<img src="${diceImages[num-1]}" width="42" style="margin:2px; border:2px solid black; border-radius:8px; background:white; box-shadow:0 0 5px rgba(0,0,0,0.8);">`).join(" ");
     showChoiceButtons();
   }, 600);
 }
@@ -117,30 +117,26 @@ function placeDice(num) {
   let count = rolledDice.filter(d => d === num).length;
   casinos[num][`p${currentPlayer}`] += count;
 
-  // 🎲 카지노에 주사위 표시
+  // 🎲 카지노에 주사위 추가
   let casinoDiv = document.getElementById(`casino-${num}`);
   for (let i = 0; i < count; i++) {
     let diceDiv = document.createElement("div");
     diceDiv.className = "dice";
-    diceDiv.innerHTML = `<img src="${diceImages[num-1]}" style="border: 2px solid ${currentPlayer === 1 ? '#ff4d4d' : '#4db8ff'}; border-radius: 5px; background:white;">`;
+    diceDiv.innerHTML = `<img src="${diceImages[num-1]}" style="border: 2px solid ${currentPlayer === 1 ? '#ff4d4d' : '#4db8ff'}; border-radius: 5px; background:white; box-shadow:0 0 5px rgba(0,0,0,0.8);">`;
     casinoDiv.appendChild(diceDiv);
   }
 
-  // 📜 게임 로그
-  addLog(`Player ${currentPlayer} placed ${count} dice on Casino ${num}`);
-
-  // 남은 주사위 줄이기
+  // 주사위 차감
   diceLeft[currentPlayer] -= count;
   document.getElementById(`p${currentPlayer}-dice`).innerText = diceLeft[currentPlayer];
   document.getElementById("choice-area").innerHTML = "";
 
-  // ✅ 라운드 끝났는지 확인
   if (diceLeft[1] === 0 && diceLeft[2] === 0) {
     endRound();
     return;
   }
 
-  // ✅ 주사위 다 쓴 사람은 턴 스킵
+  // ✅ 주사위 없는 사람은 스킵
   do {
     currentPlayer = currentPlayer === 1 ? 2 : 1;
   } while (diceLeft[currentPlayer] === 0);
@@ -168,20 +164,36 @@ function endRound() {
   document.getElementById("p1-money").innerText = money[1].toLocaleString();
   document.getElementById("p2-money").innerText = money[2].toLocaleString();
 
+  startFireworks();
+
+  // ✅ 다음 라운드 버튼 만들기 (마지막 라운드는 버튼 없이 게임 끝)
+  const controls = document.getElementById("controls");
   if (round < 4) {
-    round++;
-    document.getElementById("round-num").innerText = round;
-    diceLeft = {1: 8, 2: 8};
-    casinos.forEach(c => { if (c) { c.p1 = 0; c.p2 = 0; } });
-    initGame();
-    document.getElementById("p1-dice").innerText = "8";
-    document.getElementById("p2-dice").innerText = "8";
-    currentPlayer = 1;
-    startFireworks();
+    document.getElementById("message").innerText = `✅ 라운드 ${round} 종료! [Player1: ${money[1]} / Player2: ${money[2]}]`;
+    let nextBtn = document.createElement("button");
+    nextBtn.id = "next-round-btn";
+    nextBtn.innerText = "👉 다음 라운드 시작";
+    nextBtn.onclick = () => startNextRound();
+    controls.appendChild(nextBtn);
   } else {
     endGame();
-    startFireworks();
   }
+}
+
+function startNextRound() {
+  // 다음 라운드 준비
+  round++;
+  document.getElementById("round-num").innerText = round;
+  diceLeft = {1: 8, 2: 8};
+  casinos.forEach(c => { if (c) { c.p1 = 0; c.p2 = 0; } });
+  initGame();
+  document.getElementById("p1-dice").innerText = "8";
+  document.getElementById("p2-dice").innerText = "8";
+  currentPlayer = 1;
+
+  // 버튼 삭제
+  const nextBtn = document.getElementById("next-round-btn");
+  if (nextBtn) nextBtn.remove();
 }
 
 function flashMoney(casinoNum) {
@@ -209,15 +221,7 @@ function endGame() {
   document.getElementById("roll-btn").disabled = true;
 }
 
-// 📜 게임 로그
-function addLog(text) {
-  const logList = document.getElementById("log-list");
-  const li = document.createElement("li");
-  li.innerText = text;
-  logList.prepend(li);
-}
-
-// 🎆 폭죽 효과
+// 🎆 폭죽
 function startFireworks() {
   for (let i = 0; i < 50; i++) {
     particles.push({
