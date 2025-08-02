@@ -88,7 +88,7 @@ function placeDice(num) {
   let count = rolledDice.filter(d => d === num).length;
   casinos[num][`p${currentPlayer}`] += count;
 
-  // 주사위를 카지노에 추가
+  // ✅ 인라인 width 제거 → CSS에서 크기 제어
   let casinoDiv = document.getElementById(`casino-${num}`);
   for (let i = 0; i < count; i++) {
     let diceDiv = document.createElement("div");
@@ -107,7 +107,7 @@ function placeDice(num) {
     return;
   }
 
-  // 턴 넘김 (주사위 없는 사람 스킵)
+  // 턴 넘김
   do {
     currentPlayer = currentPlayer === 1 ? 2 : 1;
   } while (diceLeft[currentPlayer] === 0);
@@ -136,7 +136,6 @@ function endRound() {
   document.getElementById("p1-money").innerText = money[1].toLocaleString();
   document.getElementById("p2-money").innerText = money[2].toLocaleString();
 
-  // 라운드 끝나면 다음 라운드 버튼 또는 게임 종료
   if (round < 4) {
     const controls = document.getElementById("controls");
     let nextBtn = document.createElement("button");
@@ -160,7 +159,6 @@ function startNextRound() {
   document.getElementById("p2-dice").innerText = "8";
   currentPlayer = 1;
 
-  // 이전 버튼 제거
   const nextBtn = document.getElementById("next-round-btn");
   if (nextBtn) nextBtn.remove();
 }
@@ -180,7 +178,7 @@ function updateScoreboard() {
   });
 }
 
-// 폭죽 효과
+// 폭죽 애니메이션
 function animateFireworks() {
   ctx.clearRect(0, 0, fireworksCanvas.width, fireworksCanvas.height);
   particles.forEach((p, index) => {
