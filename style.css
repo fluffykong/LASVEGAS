@@ -30,12 +30,15 @@ h1 {
   max-width: 700px;
 }
 
-/* 🎰 카지노 보드 */
+/* 🎰 카지노 보드 (모바일/PC 공통 3×2 고정) */
 #casino-board {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  grid-template-columns: repeat(3, 1fr);   /* ✅ 가로 3칸 고정 */
+  grid-template-rows: repeat(2, auto);     /* ✅ 세로 2줄 고정 */
   gap: 10px;
   margin: 10px;
+  justify-items: center;
+  align-items: start;
 }
 
 /* 🎰 카지노 칸 */
@@ -45,9 +48,10 @@ h1 {
   border-radius: 12px;
   padding: 6px;
   min-height: 120px;
+  width: 95px;
   box-shadow: 0 0 10px rgba(255,255,255,0.3);
 
-  /* ✅ 3열 배치 */
+  /* ✅ 주사위 3열 배치 */
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   justify-items: center;
@@ -84,7 +88,7 @@ h1 {
   text-shadow: 0 0 6px black;
 }
 
-/* 🎲 카지노에 올려진 주사위 (✅ 이미지까지 강제 축소) */
+/* 🎲 카지노에 올려진 주사위 */
 .casino .dice {
   width: 22px;
   height: 22px;
@@ -186,27 +190,32 @@ button:hover {
   font-weight: bold;
 }
 
-/* ✅ 모바일 최적화 */
-@media (max-width: 768px) {
+/* ✅ 모바일에서도 3×2 유지 */
+@media (max-width: 600px) {
   #game-container {
     flex-direction: column;
     align-items: center;
   }
+
+  #casino-board {
+    grid-template-columns: repeat(3, 1fr);  /* 모바일도 3칸 유지 */
+    grid-template-rows: repeat(2, auto);
+  }
+
   #right-panel {
     width: 95%;
     max-width: none;
     margin-top: 15px;
     height: auto;
   }
-  #casino-board {
-    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
-  }
+
   button {
     width: 90%;
     max-width: 280px;
     font-size: 16px;
     margin: 5px auto;
   }
+
   #players {
     font-size: 16px;
   }
