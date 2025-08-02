@@ -1,11 +1,11 @@
- // 🎲 흰색 바탕, 빨강 점 주사위 이미지 (가독성 높게 변경)
+// 🎲 깨짐 없는 PNG 주사위 이미지 (1024px 해상도)
 const diceImages = [
-  "https://upload.wikimedia.org/wikipedia/commons/1/14/Dice-red-1.svg",
-  "https://upload.wikimedia.org/wikipedia/commons/1/14/Dice-red-2.svg",
-  "https://upload.wikimedia.org/wikipedia/commons/1/14/Dice-red-3.svg",
-  "https://upload.wikimedia.org/wikipedia/commons/1/14/Dice-red-4.svg",
-  "https://upload.wikimedia.org/wikipedia/commons/1/14/Dice-red-5.svg",
-  "https://upload.wikimedia.org/wikipedia/commons/1/14/Dice-red-6.svg"
+  "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Dice-1-b.svg/1024px-Dice-1-b.svg.png",
+  "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Dice-2-b.svg/1024px-Dice-2-b.svg.png",
+  "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Dice-3-b.svg/1024px-Dice-3-b.svg.png",
+  "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fd/Dice-4-b.svg/1024px-Dice-4-b.svg.png",
+  "https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Dice-5-b.svg/1024px-Dice-5-b.svg.png",
+  "https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/Dice-6-b.svg/1024px-Dice-6-b.svg.png"
 ];
 
 const casinos = [];
@@ -176,7 +176,7 @@ function endRound() {
     document.getElementById("p1-dice").innerText = "8";
     document.getElementById("p2-dice").innerText = "8";
     currentPlayer = 1;
-    startFireworks(); // 🎆 라운드 종료 시 폭죽
+    startFireworks(); // 🎆 라운드 폭죽
   } else {
     endGame();
     startFireworks(); // 🎆 게임 종료 폭죽
@@ -209,7 +209,7 @@ function endGame() {
   document.getElementById("roll-btn").disabled = true;
 }
 
-// 📜 게임 로그 함수
+// 📜 게임 로그
 function addLog(text) {
   const logList = document.getElementById("log-list");
   const li = document.createElement("li");
