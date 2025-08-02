@@ -10,7 +10,7 @@
   <h1>🎲 Las Vegas (2 Player)</h1>
 
   <div id="game-container">
-    <!-- 🎰 게임판 -->
+    <!-- 왼쪽 패널 (게임) -->
     <div id="left-panel">
       <div id="round-info">Round: <span id="round-num">1</span> / 4</div>
       <div id="casino-board"></div>
@@ -30,10 +30,28 @@
       <div id="message"></div>
     </div>
 
-    <!-- 📜 로그 패널 -->
+    <!-- 오른쪽 패널 (로그 + 점수판) -->
     <div id="right-panel">
       <h2>📜 Game Log</h2>
       <ul id="log-list"></ul>
+
+      <!-- ✅ 점수판 -->
+      <div id="scoreboard">
+        <h2>🏆 Scoreboard</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Round</th>
+              <th>Player 1</th>
+              <th>Player 2</th>
+              <th>Winner</th>
+            </tr>
+          </thead>
+          <tbody id="scoreboard-body">
+            <!-- JS에서 채움 -->
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
