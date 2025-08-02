@@ -30,11 +30,11 @@ h1 {
   max-width: 700px;
 }
 
-/* 🎰 카지노 보드 (모바일/PC 공통 3×2 고정) */
+/* 🎰 카지노 보드 (3x2 고정) */
 #casino-board {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);   /* ✅ 가로 3칸 고정 */
-  grid-template-rows: repeat(2, auto);     /* ✅ 세로 2줄 고정 */
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, auto);
   gap: 10px;
   margin: 10px;
   justify-items: center;
@@ -51,7 +51,6 @@ h1 {
   width: 95px;
   box-shadow: 0 0 10px rgba(255,255,255,0.3);
 
-  /* ✅ 주사위 3열 배치 */
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   justify-items: center;
@@ -107,6 +106,19 @@ h1 {
   border-radius: 8px;
   background: white;
   box-shadow: 0 0 5px rgba(0,0,0,0.8);
+}
+
+/* 🎲 주사위 회전 애니메이션 */
+@keyframes dice-spin {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(90deg); }
+  50% { transform: rotate(180deg); }
+  75% { transform: rotate(270deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.rolling {
+  animation: dice-spin 0.3s linear infinite;
 }
 
 /* 버튼 */
@@ -198,7 +210,7 @@ button:hover {
   }
 
   #casino-board {
-    grid-template-columns: repeat(3, 1fr);  /* 모바일도 3칸 유지 */
+    grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(2, auto);
   }
 
