@@ -15,7 +15,7 @@ let round = 1;
 let rolledDice = [];
 let roundResults = [];
 
-// 폭죽 효과
+// 🎆 폭죽 변수
 let fireworksCanvas, ctx;
 let particles = [];
 
@@ -23,6 +23,9 @@ let particles = [];
 let bgmPlaying = false;
 const bgm = document.getElementById("bgm");
 const bgmButton = document.getElementById("bgm-toggle");
+
+// 🔊 박수 효과음
+const clapSound = document.getElementById("clap-sound");
 
 // ✅ BGM 버튼 클릭 이벤트
 bgmButton.addEventListener("click", () => {
@@ -112,7 +115,7 @@ function placeDice(num) {
   let count = rolledDice.filter(d => d === num).length;
   casinos[num][`p${currentPlayer}`] += count;
 
-  // 🎲 카지노에 주사위 추가 (인라인 width 제거 → CSS로 제어)
+  // 🎲 카지노에 주사위 추가
   let casinoDiv = document.getElementById(`casino-${num}`);
   for (let i = 0; i < count; i++) {
     let diceDiv = document.createElement("div");
@@ -169,7 +172,18 @@ function endRound() {
     nextBtn.onclick = () => startNextRound();
     controls.appendChild(nextBtn);
   } else {
+    // ✅ 최종 라운드 끝 → 폭죽 + 박수소리 효과
     document.getElementById("message").innerText = `🎉 게임 종료! 🏆 ${winner} 승리!`;
+
+    // 👏 박수소리 재생
+    clapSound.currentTime = 0;
+    clapSound.play().catch(err => console.log("박수소리 차단:", err));
+
+    // 🎆 폭죽 50개 발사
+    for (let i = 0; i < 50; i++) {
+      particles.push(createParticle());
+    }
+
     document.getElementById("roll-btn").disabled = true;
   }
 }
@@ -203,7 +217,17 @@ function updateScoreboard() {
   });
 }
 
-// 🎆 폭죽 애니메이션
+// 🎆 폭죽 관련 함수
+function createParticle() {
+  return {
+    x: Math.random() * window.innerWidth,
+    y: Math.random() * window.innerHeight,
+    dx: (Math.random() - 0.5) * 4,
+    dy: (Math.random() - 0.5) * 4,
+    life: 100
+  };
+}
+
 function animateFireworks() {
   ctx.clearRect(0, 0, fireworksCanvas.width, fireworksCanvas.height);
   particles.forEach((p, index) => {
