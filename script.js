@@ -89,7 +89,7 @@ function distributeMoney() {
 function rollDice() {
   if (diceLeft[currentPlayer] <= 0 && diceLeft[`neutral${currentPlayer}`] <= 0) return;
 
-  // 🎲 효과음 (첫 클릭 차단되도 alert 안 띄움)
+  // 🎲 효과음
   rollSound.currentTime = 0;
   rollSound.volume = 1.0;
   rollSound.play().catch(err => {
@@ -204,7 +204,17 @@ function endRound() {
     let p2 = casinos[i].p2;
     let neutral = casinos[i].neutral;
 
-    // ✅ 1. 중립 주사위를 Player1과 Player2에 각각 매칭해 상쇄
+    // ✅ 1. 세 값이 모두 같으면 → 자동 무승부 (점수 없음)
+    if (p1 === p2 && p2 === neutral) {
+      continue;
+    }
+
+    // ✅ 2. 중립이 가장 많으면 → 보드 봉인
+    if (neutral > p1 && neutral > p2) {
+      continue;
+    }
+
+    // ✅ 3. 중립과 플레이어 주사위 상쇄
     let cancelFromP1 = Math.min(p1, neutral);
     p1 -= cancelFromP1;
     neutral -= cancelFromP1;
@@ -213,15 +223,11 @@ function endRound() {
     p2 -= cancelFromP2;
     neutral -= cancelFromP2;
 
-    // ✅ 2. 점수 계산 로직
-    if (neutral > 0) {
-      // 중립 주사위가 남아있으면 그 보드는 봉인
-      continue;
-    }
-    if (p1 === p2) {
-      // 남은 주사위 수도 같으면 무승부
-      continue;
-    }
+    // ✅ 4. 남은 중립이 있으면 → 점수 없음
+    if (neutral > 0) continue;
+
+    // ✅ 5. 남은 주사위 비교
+    if (p1 === p2) continue; // 무승부
     if (p1 > p2) {
       money[1] += casinos[i].money;
     } else {
@@ -229,8 +235,9 @@ function endRound() {
     }
   }
 
-  // ✅ 라운드 승자 계산
-  let winner = (money[1] > money[2]) ? "Player 1" : (money[2] > money[1]) ? "Player 2" : "Draw";
+  // ✅ 라운드 승자 정리
+  let winner = (money[1] > money[2]) ? "Player 1" :
+               (money[2] > money[1]) ? "Player 2" : "Draw";
 
   roundResults.push({ round, p1: money[1], p2: money[2], winner });
   updateScoreboard();
@@ -248,7 +255,6 @@ function endRound() {
   } else {
     document.getElementById("message").innerText = `🎉 게임 종료! 🏆 ${winner} 승리!`;
 
-    // 👏 박수소리
     clapSound.currentTime = 0;
     clapSound.volume = 1.0;
     clapSound.play().catch(err => console.log("👏 박수소리 첫 클릭 차단:", err));
