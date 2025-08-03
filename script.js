@@ -204,35 +204,19 @@ function endRound() {
     let p2 = casinos[i].p2;
     let neutral = casinos[i].neutral;
 
-    // ✅ 1. 세 값이 모두 같으면 → 자동 무승부 (점수 없음)
-    if (p1 === p2 && p2 === neutral) {
-      continue;
-    }
+    // 1️⃣ 중립이 가장 많으면 → 점수 없음
+    if (neutral > p1 && neutral > p2) continue;
 
-    // ✅ 2. 중립이 가장 많으면 → 보드 봉인
-    if (neutral > p1 && neutral > p2) {
-      continue;
-    }
+    // 2️⃣ 세 값이 모두 같으면 → 무승부
+    if (p1 === p2 && p2 === neutral) continue;
 
-    // ✅ 3. 중립과 플레이어 주사위 상쇄
-    let cancelFromP1 = Math.min(p1, neutral);
-    p1 -= cancelFromP1;
-    neutral -= cancelFromP1;
-
-    let cancelFromP2 = Math.min(p2, neutral);
-    p2 -= cancelFromP2;
-    neutral -= cancelFromP2;
-
-    // ✅ 4. 남은 중립이 있으면 → 점수 없음
-    if (neutral > 0) continue;
-
-    // ✅ 5. 남은 주사위 비교
-    if (p1 === p2) continue; // 무승부
-    if (p1 > p2) {
+    // 3️⃣ 가장 많은 주사위를 가진 플레이어 점수 획득
+    if (p1 > p2 && p1 > neutral) {
       money[1] += casinos[i].money;
-    } else {
+    } else if (p2 > p1 && p2 > neutral) {
       money[2] += casinos[i].money;
     }
+    // ⚖️ 동률이면 아무도 점수 획득 X
   }
 
   // ✅ 라운드 승자 정리
