@@ -12,7 +12,10 @@
   <div id="game-container">
     <!-- 왼쪽 패널 (게임 화면) -->
     <div id="left-panel">
+      <!-- 라운드 정보 -->
       <div id="round-info">Round: <span id="round-num">1</span> / 4</div>
+
+      <!-- 🎰 카지노 보드 -->
       <div id="casino-board"></div>
 
       <!-- 플레이어 상태 -->
@@ -51,7 +54,7 @@
             </tr>
           </thead>
           <tbody id="scoreboard-body">
-            <!-- JS에서 자동 추가 -->
+            <!-- JS에서 자동으로 채워짐 -->
           </tbody>
         </table>
       </div>
@@ -62,9 +65,8 @@
   <canvas id="fireworks"></canvas>
 
   <!-- 🔊 효과음 -->
-  <audio id="roll-sound" src="https://actions.google.com/sounds/v1/foley/dice_roll.ogg"></audio>
-  <audio id="cash-sound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
-  <audio id="clap-sound" src="https://actions.google.com/sounds/v1/ambiences/applause_medium.ogg"></audio> <!-- 👏 박수소리 -->
+  <audio id="roll-sound" src="https://actions.google.com/sounds/v1/foley/dice_roll.ogg"></audio>  <!-- 🎲 주사위 굴리는 소리 -->
+  <audio id="clap-sound" src="https://actions.google.com/sounds/v1/ambiences/applause_medium.ogg"></audio> <!-- 👏 박수 소리 -->
   
   <!-- 🎼 BGM -->
   <audio id="bgm" src="https://www.bensound.com/bensound-music/bensound-jazzyfrenchy.mp3" loop></audio>
