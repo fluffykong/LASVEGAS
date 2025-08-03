@@ -19,16 +19,16 @@ let roundResults = [];
 let fireworksCanvas, ctx;
 let particles = [];
 
-// 🎵 BGM
-let bgmPlaying = false;
+// 🔊 사운드
 const bgm = document.getElementById("bgm");
 const bgmButton = document.getElementById("bgm-toggle");
+const clapSound = document.getElementById("clap-sound");
+const rollSound = document.getElementById("roll-sound");
 
-// 🔊 사운드 효과
-const clapSound = document.getElementById("clap-sound");    // 👏 박수소리
-const rollSound = document.getElementById("roll-sound");    // 🎲 주사위 굴리는 소리
+// BGM 상태
+let bgmPlaying = false;
 
-// ✅ BGM 버튼 이벤트
+// ✅ BGM 토글
 bgmButton.addEventListener("click", () => {
   if (!bgmPlaying) {
     bgm.volume = 0.4;
@@ -36,8 +36,8 @@ bgmButton.addEventListener("click", () => {
       bgmPlaying = true;
       bgmButton.innerText = "🎵 BGM OFF";
     }).catch(err => {
-      console.log("BGM 자동재생 차단:", err);
-      alert("🔈 브라우저 자동재생 정책으로 첫 클릭 후 다시 눌러주세요.");
+      alert("🔈 브라우저 자동재생 정책 때문에 첫 클릭 후 다시 눌러주세요.");
+      console.log("BGM 차단:", err);
     });
   } else {
     bgm.pause();
@@ -75,7 +75,6 @@ function initGame() {
   animateFireworks();
 }
 
-// 🎲 주사위 굴리기 버튼
 document.getElementById("roll-btn").addEventListener("click", rollDice);
 
 function distributeMoney() {
@@ -86,14 +85,17 @@ function distributeMoney() {
   }
 }
 
-/* ✅ 주사위 굴릴 때 회전 효과 + 효과음 추가 */
+/* 🎲 주사위 굴릴 때 효과음 + 회전 효과 */
 function rollDice() {
   if (diceLeft[currentPlayer] <= 0) return;
 
-  // 🎲 효과음 재생
+  // ✅ 🎲 주사위 소리 재생
   rollSound.currentTime = 0;
-  rollSound.volume = 0.6;
-  rollSound.play().catch(err => console.log("주사위 소리 차단:", err));
+  rollSound.volume = 1.0;
+  rollSound.play().catch(err => {
+    alert("🎲 주사위 효과음 재생을 위해 한 번 더 눌러주세요!");
+    console.log("Roll Sound 차단:", err);
+  });
 
   const resultDiv = document.getElementById("dice-result");
   resultDiv.innerHTML = "";
@@ -198,10 +200,12 @@ function endRound() {
 
     // 👏 박수소리 확실히 재생
     clapSound.currentTime = 0;
-    clapSound.volume = 1.0;  // 볼륨 최대로
-    clapSound.play().catch(err => console.log("박수소리 차단:", err));
+    clapSound.volume = 1.0;
+    clapSound.play().catch(err => {
+      alert("👏 박수소리가 차단되었습니다. 화면을 탭하고 다시 눌러주세요!");
+      console.log("박수소리 차단:", err);
+    });
 
-    // 🎆 폭죽 50개 발사
     for (let i = 0; i < 50; i++) {
       particles.push(createParticle());
     }
