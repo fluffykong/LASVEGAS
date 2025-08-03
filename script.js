@@ -222,12 +222,20 @@ function endRound() {
     // 2️⃣ 세 값이 모두 같으면 → 무승부
     if (p1 === p2 && p2 === neutral) continue;
 
-    // ✅ 보드에 돈
+    // ✅ 3️⃣ 중립과 ‘같은 수’인 플레이어 주사위 먼저 상쇄
+    if (p1 === neutral && p1 > 0) {
+      p1 = 0;
+      neutral = 0;
+    } else if (p2 === neutral && p2 > 0) {
+      p2 = 0;
+      neutral = 0;
+    }
+
+    // ✅ 남은 주사위로 승자 판정
     const boardMoney = casinos[i].money;
 
-    // 3️⃣ 승자 판정
     if (p1 > p2 && p1 > neutral) {
-      // ⭐ Player1 승리
+      // Player1 승리
       if (boardMoney.length === 2) {
         if (p2 > 0) {
           // 🎯 두 명 다 올림 → 큰 점수 Player1, 작은 점수 Player2
@@ -238,18 +246,17 @@ function endRound() {
           p1RoundScore += high;
           p2RoundScore += low;
         } else {
-          // 🎯 Player1만 올림 → Player1 점수 1개만 획득
+          // 🎯 Player1만 올림 → Player1만 큰 점수 1개 획득
           const onlyOne = Math.max(...boardMoney);
           money[1] += onlyOne;
           p1RoundScore += onlyOne;
         }
       } else {
-        // 점수 한 장 → Player1만 획득
         money[1] += boardMoney[0];
         p1RoundScore += boardMoney[0];
       }
     } else if (p2 > p1 && p2 > neutral) {
-      // ⭐ Player2 승리
+      // Player2 승리
       if (boardMoney.length === 2) {
         if (p1 > 0) {
           // 🎯 두 명 다 올림 → 큰 점수 Player2, 작은 점수 Player1
@@ -260,13 +267,12 @@ function endRound() {
           p2RoundScore += high;
           p1RoundScore += low;
         } else {
-          // 🎯 Player2만 올림 → Player2 점수 1개만 획득
+          // 🎯 Player2만 올림 → Player2만 큰 점수 1개 획득
           const onlyOne = Math.max(...boardMoney);
           money[2] += onlyOne;
           p2RoundScore += onlyOne;
         }
       } else {
-        // 점수 한 장 → Player2만 획득
         money[2] += boardMoney[0];
         p2RoundScore += boardMoney[0];
       }
