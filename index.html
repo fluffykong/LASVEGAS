@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>🎲 Las Vegas (2 Player)</h1>
+  <h1>🎲 Las Vegas (2 Player with Neutral Dice)</h1>
 
   <div id="game-container">
     <!-- 왼쪽 패널 (게임 화면) -->
@@ -20,8 +20,12 @@
 
       <!-- 플레이어 상태 -->
       <div id="players">
-        <div id="player1">Player 1 (🔴): <span id="p1-dice">8</span> dice left | 💵 <span id="p1-money">0</span></div>
-        <div id="player2">Player 2 (🔵): <span id="p2-dice">8</span> dice left | 💵 <span id="p2-money">0</span></div>
+        <div id="player1">Player 1 (🔴)  
+          <span id="p1-dice">8 (+2🟢)</span> dice left | 💵 <span id="p1-money">0</span>
+        </div>
+        <div id="player2">Player 2 (🔵)  
+          <span id="p2-dice">8 (+2🟢)</span> dice left | 💵 <span id="p2-money">0</span>
+        </div>
       </div>
 
       <!-- 게임 컨트롤 -->
@@ -65,9 +69,10 @@
   <canvas id="fireworks"></canvas>
 
   <!-- 🔊 효과음 -->
-  <audio id="roll-sound" src="https://actions.google.com/sounds/v1/foley/dice_roll.ogg"></audio>  <!-- 🎲 주사위 굴리는 소리 -->
-  <audio id="clap-sound" src="https://actions.google.com/sounds/v1/ambiences/applause_medium.ogg"></audio> <!-- 👏 박수 소리 -->
-  
+  <audio id="roll-sound" src="https://actions.google.com/sounds/v1/foley/dice_roll.ogg"></audio>  
+  <audio id="clap-sound" src="https://actions.google.com/sounds/v1/ambiences/applause_medium.ogg"></audio> 
+  <!-- 👏 박수 소리 -->
+
   <!-- 🎼 BGM -->
   <audio id="bgm" src="https://www.bensound.com/bensound-music/bensound-jazzyfrenchy.mp3" loop></audio>
 
