@@ -26,8 +26,9 @@ const clapSound = document.getElementById("clap-sound");
 const rollSound = document.getElementById("roll-sound");
 
 let bgmPlaying = false;
-let lastRoundWinner = 1; // ⭐ 새로 추가: 이전 라운드 승자 (기본 Player 1)
+let lastRoundWinner = 1; // ⭐ 직전 라운드 승자 (다음 라운드 시작 플레이어)
 
+// ✅ BGM 버튼 이벤트 (브라우저 정책 우회)
 bgmButton.addEventListener("click", () => {
   if (!bgmPlaying) {
     bgm.volume = 0.4;
@@ -35,7 +36,8 @@ bgmButton.addEventListener("click", () => {
       bgmPlaying = true;
       bgmButton.innerText = "🎵 BGM OFF";
     }).catch(err => {
-      console.log("BGM 자동재생 차단:", err);
+      console.log("🎵 BGM 시작 차단:", err);
+      alert("🔊 첫 클릭에서는 BGM이 자동재생되지 않을 수 있어요. 한 번 더 눌러주세요!");
     });
   } else {
     bgm.pause();
@@ -62,7 +64,7 @@ function initGame() {
       <div class="money" id="money-${i}"></div>
     `;
     board.appendChild(div);
-    casinos[i] = { p1: 0, p2: 0, neutral: 0, money: [] };  // ⭐ money를 배열로 관리
+    casinos[i] = { p1: 0, p2: 0, neutral: 0, money: [] };
   }
   distributeMoney();
   document.getElementById("message").innerText = `🎉 Player ${currentPlayer} 차례!`;
@@ -76,22 +78,20 @@ function initGame() {
 
 document.getElementById("roll-btn").addEventListener("click", rollDice);
 
-// ✅ 카지노별 점수 배치
+// ✅ 점수 배치
 function distributeMoney() {
   for (let i = 1; i <= 6; i++) {
-    let firstCash = Math.floor(Math.random() * 50 + 10) * 1000; // 10,000 ~ 60,000
+    let firstCash = Math.floor(Math.random() * 50 + 10) * 1000; // 10,000~60,000
     casinos[i].money.push(firstCash);
 
-    // ⭐ 첫 점수가 30,000 미만이면 하나 더 깔기
+    // ⭐ 첫 점수가 30,000 미만이면 하나 더 배치
     if (firstCash < 30000) {
       let secondCash;
       do {
         secondCash = Math.floor(Math.random() * 50 + 10) * 1000;
-      } while (firstCash + secondCash < 30000);  // 합계 30,000 이상 될 때까지
+      } while (firstCash + secondCash < 30000);
       casinos[i].money.push(secondCash);
     }
-
-    // UI 업데이트
     updateMoneyDisplay(i);
   }
 }
@@ -102,17 +102,18 @@ function updateMoneyDisplay(i) {
   moneyDiv.innerHTML = casinos[i].money.map(m => `💵 $${m.toLocaleString()}`).join("<br>");
 }
 
-/* 🎲 주사위 굴리기 (기존 동일) */
+/* 🎲 주사위 굴리기 */
 function rollDice() {
   if (diceLeft[currentPlayer] <= 0 && diceLeft[`neutral${currentPlayer}`] <= 0) return;
 
   rollSound.currentTime = 0;
   rollSound.volume = 1.0;
-  rollSound.play().catch(err => console.log("🎲 주사위 소리 첫 클릭 차단:", err));
+  rollSound.play().catch(err => console.log("🎲 주사위 소리 차단:", err));
 
   const resultDiv = document.getElementById("dice-result");
   resultDiv.innerHTML = "";
 
+  // 굴리기 전 애니메이션
   for (let i = 0; i < 5; i++) {
     let dummyDice = document.createElement("img");
     dummyDice.src = diceImages[Math.floor(Math.random() * 6)];
@@ -141,6 +142,7 @@ function rollDice() {
   }, 700);
 }
 
+// ✅ 숫자 선택 버튼 표시
 function showChoiceButtons() {
   const area = document.getElementById("choice-area");
   area.innerHTML = "<p>🎯 어떤 숫자 카지노에 둘까요?</p>";
@@ -153,8 +155,11 @@ function showChoiceButtons() {
   });
 }
 
+// ✅ 주사위를 특정 카지노에 배치
 function placeDice(num) {
   let selected = rolledDice.filter(d => d.value === num);
+
+  // 카지노에 배치
   selected.forEach(die => {
     if (die.type === "neutral") {
       casinos[num].neutral += 1;
@@ -163,6 +168,7 @@ function placeDice(num) {
     }
   });
 
+  // UI 표시
   let casinoDiv = document.getElementById(`casino-${num}`);
   selected.forEach(die => {
     let diceDiv = document.createElement("div");
@@ -172,6 +178,7 @@ function placeDice(num) {
     casinoDiv.appendChild(diceDiv);
   });
 
+  // 주사위 차감
   let normalDiceUsed = selected.filter(d => d.type !== "neutral").length;
   let neutralDiceUsed = selected.filter(d => d.type === "neutral").length;
 
@@ -183,12 +190,14 @@ function placeDice(num) {
 
   document.getElementById("choice-area").innerHTML = "";
 
+  // 라운드 종료 체크
   if ((diceLeft[1] <= 0 && diceLeft["neutral1"] <= 0) &&
       (diceLeft[2] <= 0 && diceLeft["neutral2"] <= 0)) {
     endRound();
     return;
   }
 
+  // 턴 넘김
   do {
     currentPlayer = currentPlayer === 1 ? 2 : 1;
   } while (diceLeft[currentPlayer] <= 0 && diceLeft[`neutral${currentPlayer}`] <= 0);
@@ -207,37 +216,62 @@ function endRound() {
     let p2 = casinos[i].p2;
     let neutral = casinos[i].neutral;
 
+    // 1️⃣ 중립이 가장 많으면 → 점수 없음
     if (neutral > p1 && neutral > p2) continue;
+
+    // 2️⃣ 세 값이 모두 같으면 → 무승부
     if (p1 === p2 && p2 === neutral) continue;
 
+    // ✅ 보드에 돈
+    const boardMoney = casinos[i].money;
+
+    // 3️⃣ 승자 판정
     if (p1 > p2 && p1 > neutral) {
-      // ✅ 승자 Player1
-      if (casinos[i].money.length === 2) {
-        // 큰 점수 Player1, 작은 점수 Player2
-        const high = Math.max(...casinos[i].money);
-        const low = Math.min(...casinos[i].money);
-        money[1] += high;
-        money[2] += low;
-        p1RoundScore += high;
-        p2RoundScore += low;
+      // ⭐ Player1 승리
+      if (boardMoney.length === 2) {
+        if (p2 > 0) {
+          // 🎯 두 명 다 올림 → 큰 점수 Player1, 작은 점수 Player2
+          const high = Math.max(...boardMoney);
+          const low = Math.min(...boardMoney);
+          money[1] += high;
+          money[2] += low;
+          p1RoundScore += high;
+          p2RoundScore += low;
+        } else {
+          // 🎯 Player1만 올림 → Player1 점수 1개만 획득
+          const onlyOne = Math.max(...boardMoney);
+          money[1] += onlyOne;
+          p1RoundScore += onlyOne;
+        }
       } else {
-        money[1] += casinos[i].money[0];
-        p1RoundScore += casinos[i].money[0];
+        // 점수 한 장 → Player1만 획득
+        money[1] += boardMoney[0];
+        p1RoundScore += boardMoney[0];
       }
     } else if (p2 > p1 && p2 > neutral) {
-      // ✅ 승자 Player2
-      if (casinos[i].money.length === 2) {
-        const high = Math.max(...casinos[i].money);
-        const low = Math.min(...casinos[i].money);
-        money[2] += high;
-        money[1] += low;
-        p2RoundScore += high;
-        p1RoundScore += low;
+      // ⭐ Player2 승리
+      if (boardMoney.length === 2) {
+        if (p1 > 0) {
+          // 🎯 두 명 다 올림 → 큰 점수 Player2, 작은 점수 Player1
+          const high = Math.max(...boardMoney);
+          const low = Math.min(...boardMoney);
+          money[2] += high;
+          money[1] += low;
+          p2RoundScore += high;
+          p1RoundScore += low;
+        } else {
+          // 🎯 Player2만 올림 → Player2 점수 1개만 획득
+          const onlyOne = Math.max(...boardMoney);
+          money[2] += onlyOne;
+          p2RoundScore += onlyOne;
+        }
       } else {
-        money[2] += casinos[i].money[0];
-        p2RoundScore += casinos[i].money[0];
+        // 점수 한 장 → Player2만 획득
+        money[2] += boardMoney[0];
+        p2RoundScore += boardMoney[0];
       }
     }
+    // ⚖️ p1 === p2 → 무승부 → 점수 없음
   }
 
   // ✅ 이번 라운드 승자 판단
@@ -246,7 +280,7 @@ function endRound() {
   } else if (p2RoundScore > p1RoundScore) {
     lastRoundWinner = 2;
   } else {
-    lastRoundWinner = 1; // 무승부면 Player 1부터 시작
+    lastRoundWinner = 1; // 무승부 → Player1 선
   }
 
   // ✅ 전체 게임 승자 표시
@@ -271,7 +305,7 @@ function endRound() {
 
     clapSound.currentTime = 0;
     clapSound.volume = 1.0;
-    clapSound.play().catch(err => console.log("👏 박수소리 첫 클릭 차단:", err));
+    clapSound.play().catch(err => console.log("👏 박수소리 차단:", err));
 
     for (let i = 0; i < 50; i++) {
       particles.push(createParticle());
@@ -281,6 +315,7 @@ function endRound() {
   }
 }
 
+/* ✅ 다음 라운드 시작 */
 function startNextRound() {
   round++;
   document.getElementById("round-num").innerText = round;
@@ -288,10 +323,11 @@ function startNextRound() {
   diceLeft = { 1: 8, 2: 8, neutral1: 2, neutral2: 2 };
   casinos.forEach(c => { if (c) { c.p1 = 0; c.p2 = 0; c.neutral = 0; c.money = []; } });
   initGame();
+
   document.getElementById("p1-dice").innerText = "8 (+2🟢)";
   document.getElementById("p2-dice").innerText = "8 (+2🟢)";
-
   currentPlayer = lastRoundWinner;
+
   document.getElementById("message").innerText = `🎯 Player ${currentPlayer} 차례!`;
 
   const nextBtn = document.getElementById("next-round-btn");
@@ -314,7 +350,7 @@ function updateScoreboard() {
   });
 }
 
-/* 🎆 폭죽 관련 */
+/* 🎆 폭죽 효과 */
 function createParticle() {
   return {
     x: Math.random() * window.innerWidth,
@@ -338,4 +374,4 @@ function animateFireworks() {
     if (p.life <= 0) particles.splice(index, 1);
   });
   requestAnimationFrame(animateFireworks);
-    }
+}
