@@ -15,7 +15,7 @@ let round = 1;
 let rolledDice = [];
 let roundResults = [];
 
-// 🎆 폭죽 효과
+// 🎆 폭죽 효과 관련
 let fireworksCanvas, ctx;
 let particles = [];
 
@@ -46,6 +46,7 @@ bgmButton.addEventListener("click", () => {
 
 initGame();
 
+// ✅ 게임 초기화
 function initGame() {
   const board = document.getElementById("casino-board");
   board.innerHTML = "";
@@ -75,6 +76,7 @@ function initGame() {
 
 document.getElementById("roll-btn").addEventListener("click", rollDice);
 
+// ✅ 카지노별 금액 배치
 function distributeMoney() {
   for (let i = 1; i <= 6; i++) {
     let cash = Math.floor(Math.random() * 50 + 10) * 1000;
@@ -83,11 +85,11 @@ function distributeMoney() {
   }
 }
 
-/* 🎲 주사위 굴릴 때 효과음 + 회전 효과 */
+/* 🎲 주사위 굴리기 */
 function rollDice() {
   if (diceLeft[currentPlayer] <= 0 && diceLeft[`neutral${currentPlayer}`] <= 0) return;
 
-  // 🎲 효과음 즉시 재생 (alert 제거)
+  // 🎲 효과음 (첫 클릭 차단되도 alert 안 띄움)
   rollSound.currentTime = 0;
   rollSound.volume = 1.0;
   rollSound.play().catch(err => {
@@ -97,7 +99,7 @@ function rollDice() {
   const resultDiv = document.getElementById("dice-result");
   resultDiv.innerHTML = "";
 
-  // 🎲 가짜 주사위 5개 (회전 애니메이션)
+  // 🎲 굴리기 전 애니메이션 (가짜 주사위)
   for (let i = 0; i < 5; i++) {
     let dummyDice = document.createElement("img");
     dummyDice.src = diceImages[Math.floor(Math.random() * 6)];
@@ -110,20 +112,19 @@ function rollDice() {
     resultDiv.appendChild(dummyDice);
   }
 
-  // 🎲 0.7초 후 실제 주사위 표시
   setTimeout(() => {
     rolledDice = [];
 
-    // ✅ 자기 색 주사위 굴림
+    // ✅ 자기 색 주사위
     for (let i = 0; i < diceLeft[currentPlayer]; i++) {
       rolledDice.push({ value: Math.floor(Math.random() * 6) + 1, type: currentPlayer });
     }
-    // ✅ 중립 주사위 굴림
+    // ✅ 중립 주사위
     for (let i = 0; i < diceLeft[`neutral${currentPlayer}`]; i++) {
       rolledDice.push({ value: Math.floor(Math.random() * 6) + 1, type: "neutral" });
     }
 
-    resultDiv.innerHTML = `Player ${currentPlayer} rolled: ` + 
+    resultDiv.innerHTML = `Player ${currentPlayer} rolled: ` +
       rolledDice.map(d => `<img src="${diceImages[d.value-1]}" width="42" 
         style="margin:2px; border:2px solid ${d.type === 1 ? '#ff4d4d' : d.type === 2 ? '#4db8ff' : 'green'}; border-radius:8px; background:white;">`).join(" ");
 
@@ -131,6 +132,7 @@ function rollDice() {
   }, 700);
 }
 
+// ✅ 숫자 선택 버튼 표시
 function showChoiceButtons() {
   const area = document.getElementById("choice-area");
   area.innerHTML = "<p>🎯 어떤 숫자 카지노에 둘까요?</p>";
@@ -143,6 +145,7 @@ function showChoiceButtons() {
   });
 }
 
+// ✅ 주사위를 특정 카지노에 배치
 function placeDice(num) {
   let selected = rolledDice.filter(d => d.value === num);
 
@@ -201,18 +204,32 @@ function endRound() {
     let p2 = casinos[i].p2;
     let neutral = casinos[i].neutral;
 
-    // ✅ 중립 주사위 수만큼 플레이어 주사위를 깎음
-    let effectiveP1 = Math.max(0, p1 - neutral);
-    let effectiveP2 = Math.max(0, p2 - neutral);
+    // ✅ 1. 중립 주사위를 Player1과 Player2에 각각 매칭해 상쇄
+    let cancelFromP1 = Math.min(p1, neutral);
+    p1 -= cancelFromP1;
+    neutral -= cancelFromP1;
 
-    if (effectiveP1 > effectiveP2) {
+    let cancelFromP2 = Math.min(p2, neutral);
+    p2 -= cancelFromP2;
+    neutral -= cancelFromP2;
+
+    // ✅ 2. 점수 계산 로직
+    if (neutral > 0) {
+      // 중립 주사위가 남아있으면 그 보드는 봉인
+      continue;
+    }
+    if (p1 === p2) {
+      // 남은 주사위 수도 같으면 무승부
+      continue;
+    }
+    if (p1 > p2) {
       money[1] += casinos[i].money;
-    } else if (effectiveP2 > effectiveP1) {
+    } else {
       money[2] += casinos[i].money;
     }
-    // 무승부(effectiveP1 == effectiveP2)면 점수 없음
   }
 
+  // ✅ 라운드 승자 계산
   let winner = (money[1] > money[2]) ? "Player 1" : (money[2] > money[1]) ? "Player 2" : "Draw";
 
   roundResults.push({ round, p1: money[1], p2: money[2], winner });
@@ -234,9 +251,7 @@ function endRound() {
     // 👏 박수소리
     clapSound.currentTime = 0;
     clapSound.volume = 1.0;
-    clapSound.play().catch(err => {
-      console.log("👏 박수소리 첫 클릭 차단:", err);
-    });
+    clapSound.play().catch(err => console.log("👏 박수소리 첫 클릭 차단:", err));
 
     for (let i = 0; i < 50; i++) {
       particles.push(createParticle());
@@ -302,4 +317,4 @@ function animateFireworks() {
     if (p.life <= 0) particles.splice(index, 1);
   });
   requestAnimationFrame(animateFireworks);
-                          }
+}
