@@ -9,7 +9,7 @@ const diceImages = [
 
 const casinos = [];
 let currentPlayer = 1;
-let diceLeft = { 1: 8, 2: 8, neutral1: 2, neutral2: 2 }; 
+let diceLeft = { 1: 8, 2: 8, neutral1: 2, neutral2: 2 };
 let money = { 1: 0, 2: 0 };
 let round = 1;
 let rolledDice = [];
@@ -85,20 +85,20 @@ function distributeMoney() {
 
 /* 🎲 주사위 굴릴 때 효과음 + 회전 효과 */
 function rollDice() {
-  // ✅ 남은 주사위 없으면 리턴
+  // ✅ 주사위 다 쓰면 리턴
   if (diceLeft[currentPlayer] <= 0 && diceLeft[`neutral${currentPlayer}`] <= 0) return;
 
-  // ✅ 🎲 효과음
+  // ✅ 🎲 효과음 즉시 재생 (alert 대신 console만)
   rollSound.currentTime = 0;
   rollSound.volume = 1.0;
   rollSound.play().catch(err => {
-    console.log("🎲 주사위 소리 차단됨:", err);
+    console.log("🎲 주사위 소리 첫 클릭 차단 (브라우저 정책):", err);
   });
 
   const resultDiv = document.getElementById("dice-result");
   resultDiv.innerHTML = "";
 
-  // 🎲 회전 주사위 표시
+  // 🎲 가짜 주사위(회전 효과)
   for (let i = 0; i < 5; i++) {
     let dummyDice = document.createElement("img");
     dummyDice.src = diceImages[Math.floor(Math.random() * 6)];
@@ -114,15 +114,16 @@ function rollDice() {
   setTimeout(() => {
     rolledDice = [];
 
-    // ✅ 플레이어 색 주사위 굴림
+    // ✅ 자기 색 주사위 굴림
     for (let i = 0; i < diceLeft[currentPlayer]; i++) {
       rolledDice.push({ value: Math.floor(Math.random() * 6) + 1, type: currentPlayer });
     }
-    // ✅ 중립 주사위 굴림
+    // ✅ 중립 주사위 굴림 (예: neutral1 or neutral2)
     for (let i = 0; i < diceLeft[`neutral${currentPlayer}`]; i++) {
       rolledDice.push({ value: Math.floor(Math.random() * 6) + 1, type: "neutral" });
     }
 
+    // ✅ 화면에 주사위 전부 출력 (총 10개)
     resultDiv.innerHTML = `Player ${currentPlayer} rolled: ` + 
       rolledDice.map(d => `<img src="${diceImages[d.value-1]}" width="42" 
         style="margin:2px; border:2px solid ${d.type === 1 ? '#ff4d4d' : d.type === 2 ? '#4db8ff' : 'green'}; border-radius:8px; background:white;">`).join(" ");
@@ -135,7 +136,6 @@ function showChoiceButtons() {
   const area = document.getElementById("choice-area");
   area.innerHTML = "<p>🎯 어떤 숫자 카지노에 둘까요?</p>";
 
-  // 중복 제거 후 버튼 생성
   [...new Set(rolledDice.map(d => d.value))].forEach(num => {
     let btn = document.createElement("button");
     btn.innerHTML = `<img src="${diceImages[num-1]}" width="30" style="border:1px solid black; border-radius:5px; background:white;"> (${num})`;
@@ -157,7 +157,7 @@ function placeDice(num) {
     }
   });
 
-  // 🎲 UI에 주사위 표시
+  // 🎲 UI에 표시
   let casinoDiv = document.getElementById(`casino-${num}`);
   selected.forEach(die => {
     let diceDiv = document.createElement("div");
@@ -174,6 +174,7 @@ function placeDice(num) {
   diceLeft[currentPlayer] -= normalDiceUsed;
   diceLeft[`neutral${currentPlayer}`] -= neutralDiceUsed;
 
+  // ✅ 남은 주사위 표시
   document.getElementById(`p${currentPlayer}-dice`).innerText =
     diceLeft[currentPlayer] + (diceLeft[`neutral${currentPlayer}`] > 0 ? ` (+${diceLeft[`neutral${currentPlayer}`]}🟢)` : "");
 
@@ -197,11 +198,10 @@ function placeDice(num) {
 function endRound() {
   document.getElementById("message").innerText = "💰 라운드 종료! 점수 계산 중...";
 
-  // ✅ 점수 계산
+  // ✅ 점수 계산 (중립 주사위는 점수에 영향 없음)
   for (let i = 1; i <= 6; i++) {
     let p1 = casinos[i].p1;
     let p2 = casinos[i].p2;
-    // ✅ 중립 주사위는 점수 계산에 불포함
     if (p1 > p2) money[1] += casinos[i].money;
     else if (p2 > p1) money[2] += casinos[i].money;
   }
@@ -225,11 +225,10 @@ function endRound() {
     // ✅ 최종 라운드 종료 → 폭죽 + 박수소리
     document.getElementById("message").innerText = `🎉 게임 종료! 🏆 ${winner} 승리!`;
 
-    // 👏 박수소리 재생
     clapSound.currentTime = 0;
     clapSound.volume = 1.0;
     clapSound.play().catch(err => {
-      console.log("👏 박수소리 차단됨:", err);
+      console.log("👏 박수소리 첫 클릭 차단:", err);
     });
 
     for (let i = 0; i < 50; i++) {
