@@ -19,13 +19,14 @@ let roundResults = [];
 let fireworksCanvas, ctx;
 let particles = [];
 
-// 🎵 BGM 관련
+// 🎵 BGM
 let bgmPlaying = false;
 const bgm = document.getElementById("bgm");
 const bgmButton = document.getElementById("bgm-toggle");
 
-// 👏 박수소리
-const clapSound = document.getElementById("clap-sound");
+// 🔊 사운드 효과
+const clapSound = document.getElementById("clap-sound");    // 👏 박수소리
+const rollSound = document.getElementById("roll-sound");    // 🎲 주사위 굴리는 소리
 
 // ✅ BGM 버튼 이벤트
 bgmButton.addEventListener("click", () => {
@@ -85,9 +86,14 @@ function distributeMoney() {
   }
 }
 
-/* ✅ 주사위 굴릴 때 돌아가는 효과 추가 */
+/* ✅ 주사위 굴릴 때 회전 효과 + 효과음 추가 */
 function rollDice() {
   if (diceLeft[currentPlayer] <= 0) return;
+
+  // 🎲 효과음 재생
+  rollSound.currentTime = 0;
+  rollSound.volume = 0.6;
+  rollSound.play().catch(err => console.log("주사위 소리 차단:", err));
 
   const resultDiv = document.getElementById("dice-result");
   resultDiv.innerHTML = "";
@@ -190,9 +196,12 @@ function endRound() {
     // ✅ 최종 라운드 종료 → 폭죽 + 박수소리
     document.getElementById("message").innerText = `🎉 게임 종료! 🏆 ${winner} 승리!`;
 
+    // 👏 박수소리 확실히 재생
     clapSound.currentTime = 0;
+    clapSound.volume = 1.0;  // 볼륨 최대로
     clapSound.play().catch(err => console.log("박수소리 차단:", err));
 
+    // 🎆 폭죽 50개 발사
     for (let i = 0; i < 50; i++) {
       particles.push(createParticle());
     }
